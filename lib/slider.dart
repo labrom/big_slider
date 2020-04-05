@@ -103,6 +103,8 @@ class _BigSliderState extends State<BigSlider> {
     setState(() {
       _valueChange = distance;
     });
+    widget._listener(TouchType.values[_fingers - 1],
+        widget._values[_fingers - 1] + _valueChange);
   }
 
   void _commitValue() {
