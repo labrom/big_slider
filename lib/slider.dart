@@ -5,30 +5,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-/// The different touch interactions that can be used to update different values.
-enum TouchType { oneFinger, twoFinger, threeFinger, fourFinger, fiveFinger }
-
-/// Descriptor for a given type of value.
-class ValueDescriptor {
-  final double initialValue;
-  final double maxValue;
-  final double minValue;
-  final double increment;
-  final String name;
-
-  ValueDescriptor({
-    this.initialValue,
-    this.maxValue,
-    this.minValue,
-    this.increment,
-    this.name,
-  });
-}
-
-/// A value listener function that receives updates for different values.
-typedef ValueListener = void Function(TouchType, double);
-
-/// A slider widget that can handle multiple independent values using multi-touch.
+/// A slider widget that can handle multiple independent values using different
+/// multi-touch vertical drag gestures.
+///
+/// The widget is built using a map of touch gesture types (as in: the number of
+/// pointers or fingers) and value descriptors.
 class BigSlider extends StatefulWidget {
   final List<double> _values;
   final List<ValueDescriptor> _descriptors;
@@ -48,6 +29,33 @@ class BigSlider extends StatefulWidget {
 
   void _incrementValue(int fingers, double increment) =>
       _values[fingers - 1] += increment;
+}
+
+/// A value listener function that receives updates for different values.
+///
+/// A value listener must be provided to the widget in order to receive value updates.
+/// When a values are adjusted, the listener will received the updated values,
+/// along with the type of touch gesture the value is associated to.
+typedef ValueListener = void Function(TouchType, double);
+
+/// The different touch interactions that can be used to update different values.
+enum TouchType { oneFinger, twoFinger, threeFinger, fourFinger, fiveFinger }
+
+/// Descriptor for a given type of value.
+class ValueDescriptor {
+  final double initialValue;
+  final double maxValue;
+  final double minValue;
+  final double increment;
+  final String name;
+
+  ValueDescriptor({
+    this.initialValue,
+    this.maxValue,
+    this.minValue,
+    this.increment,
+    this.name,
+  });
 }
 
 class _BigSliderState extends State<BigSlider> {
@@ -99,6 +107,7 @@ class _BigSliderState extends State<BigSlider> {
       ? (widget._values[_fingers - 1] + _valueChange).round().toString()
       : '';
 
+  /// Updates the value as it's being changed using the corresponding drag gesture.
   void _updateValue(double distance) {
     setState(() {
       _valueChange = distance;
@@ -107,6 +116,10 @@ class _BigSliderState extends State<BigSlider> {
         widget._values[_fingers - 1] + _valueChange);
   }
 
+  /// Updates the widget's value at the end of a given drag gesture.
+  ///
+  /// The system is also reset so that another (or the same) value can be adjusted
+  /// using another drag gesture.
   void _commitValue() {
     widget._incrementValue(_fingers, _valueChange);
     _valueChange = 0;
