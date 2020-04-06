@@ -1,6 +1,6 @@
 library big_slider;
 
-import 'dart:math';
+import 'drag.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -53,11 +53,11 @@ class BigSlider extends StatefulWidget {
 class _BigSliderState extends State<BigSlider> {
   double _valueChange = 0;
   int _fingers = 0;
-  _DragState _state;
+  DragState _state;
 
   @override
   Widget build(BuildContext context) {
-    _state = _DragState(_updateValue, _commitValue);
+    _state = DragState(_updateValue, _commitValue);
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory>{
         VerticalMultiDragGestureRecognizer: _verticalMultiDragGestureFactory,
@@ -113,71 +113,5 @@ class _BigSliderState extends State<BigSlider> {
     setState(() {
       _fingers = 0;
     });
-  }
-}
-
-/// State manager that holds all the individual drags.
-class _DragState {
-  List<_Drag> _drags = [];
-  void Function(double distance) _onUpdateDrag;
-  void Function() _onCommitDrag;
-  bool _increase = true;
-
-  _DragState(this._onUpdateDrag, this._onCommitDrag);
-
-  int get dragCount => _drags.length;
-
-  /// Creates and keeps track of an additional drag.
-  ///
-  /// Returns the newly created drag.
-  Drag addDrag() {
-    if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
-      _drags.clear();
-    }
-    var dragState = _Drag(_updateDrag);
-    _drags.add(dragState);
-    return dragState;
-  }
-
-  void _updateDrag() {
-    if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
-      _onCommitDrag();
-      _drags.clear();
-    } else {
-      var mean = _drags.fold<double>(0, (sum, drag) => sum + drag._distance) /
-          _drags.length;
-      _increase = mean >= 0;
-      var maxDistance = _drags.fold<double>(
-          0, (distance, drag) => max<double>(distance, drag._distance.abs()));
-      _onUpdateDrag(_increase ? maxDistance : -maxDistance);
-    }
-  }
-}
-
-/// Drag event receiver for a single drag.
-class _Drag implements Drag {
-  double _distance = 0;
-  bool active = true;
-  void Function() _updateDragState;
-
-  _Drag(this._updateDragState);
-
-  @override
-  void cancel() => _completeDrag();
-
-  @override
-  void end(DragEndDetails details) => _completeDrag();
-
-  @override
-  void update(DragUpdateDetails details) {
-    active = true;
-    _distance -= details.delta.dy;
-    _updateDragState();
-  }
-
-  void _completeDrag() {
-    active = false;
-    _updateDragState();
-    _distance = 0;
   }
 }
