@@ -2,6 +2,9 @@ import 'package:big_slider/slider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void Function(TouchType, double) valuePrinter =
+    (type, value) => print('Value: $value');
+
 void main() {
   testWidgets('The widget is inserted.', (tester) async {
     await tester.pumpWidget(Directionality(
@@ -19,7 +22,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger: ValueDescriptor(initialValue: 0),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
@@ -34,7 +37,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger: ValueDescriptor(initialValue: 0, name: "throttle"),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
@@ -49,7 +52,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger: ValueDescriptor(initialValue: 0, name: "throttle"),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(1, 0));
     await tester.pumpAndSettle();
@@ -64,7 +67,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger: ValueDescriptor(initialValue: 0),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
@@ -78,32 +81,31 @@ void main() {
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger: ValueDescriptor(initialValue: 0),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 1));
     await tester.pumpAndSettle();
     expect(find.text('-1'), findsOneWidget);
   });
 
-  testWidgets(
-      'A value is not reset between two drag gestures.',
-          (tester) async {
-        await tester.pumpWidget(Directionality(
-          textDirection: TextDirection.ltr,
-          child: BigSlider(<TouchType, ValueDescriptor>{
-            TouchType.oneFinger: ValueDescriptor(initialValue: 0),
-          }, (type, value) => print('Value: $value')),
-        ));
-        await tester.drag(find.byType(BigSlider), Offset(0, -1));
-        await tester.pumpAndSettle();
-        expect(find.text('1'), findsOneWidget);
-        await tester.drag(find.byType(BigSlider), Offset(0, -1));
-        await tester.pumpAndSettle();
-        expect(find.text('2'), findsOneWidget);
-        await tester.drag(find.byType(BigSlider), Offset(0, 3));
-        await tester.pumpAndSettle();
-        expect(find.text('-1'), findsOneWidget);
-      });
+  testWidgets('A value is not reset between two drag gestures.',
+      (tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: BigSlider(<TouchType, ValueDescriptor>{
+        TouchType.oneFinger: ValueDescriptor(initialValue: 0),
+      }, valuePrinter),
+    ));
+    await tester.drag(find.byType(BigSlider), Offset(0, -1));
+    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, -1));
+    await tester.pumpAndSettle();
+    expect(find.text('2'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, 3));
+    await tester.pumpAndSettle();
+    expect(find.text('-1'), findsOneWidget);
+  });
 
   testWidgets('A value never goes beyond the maximum or minimum.',
       (tester) async {
@@ -112,7 +114,7 @@ void main() {
       child: BigSlider(<TouchType, ValueDescriptor>{
         TouchType.oneFinger:
             ValueDescriptor(initialValue: 0, minValue: -3, maxValue: 5),
-      }, (type, value) => print('Value: $value')),
+      }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 10));
     await tester.pumpAndSettle();
