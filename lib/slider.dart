@@ -59,20 +59,27 @@ class ValueDescriptor {
 }
 
 class _BigSliderState extends State<BigSlider> {
-  double _valueChange = 0;
-  int _fingers = 0;
+  double _valueChange;
+  int _fingers;
+  bool _display;
   DragState _state;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    _valueChange = 0;
+    _fingers = 0;
+    _display = false;
     _state = DragState(_updateValue, _commitValue);
-    return RawGestureDetector(
-      gestures: <Type, GestureRecognizerFactory>{
-        VerticalMultiDragGestureRecognizer: _verticalMultiDragGestureFactory,
-      },
-      child: _body,
-    );
+    super.initState();
   }
+
+  @override
+  Widget build(BuildContext context) => RawGestureDetector(
+        gestures: <Type, GestureRecognizerFactory>{
+          VerticalMultiDragGestureRecognizer: _verticalMultiDragGestureFactory,
+        },
+        child: _body,
+      );
 
   GestureRecognizerFactory get _verticalMultiDragGestureFactory =>
       GestureRecognizerFactoryWithHandlers<VerticalMultiDragGestureRecognizer>(
@@ -83,6 +90,7 @@ class _BigSliderState extends State<BigSlider> {
   Drag _onDragStart(Offset offset) {
     var newDrag = _state.addDrag();
     setState(() {
+      _display = true;
       _fingers = _state.dragCount;
     });
     return newDrag;
@@ -101,9 +109,9 @@ class _BigSliderState extends State<BigSlider> {
       );
 
   String get _nameDisplay =>
-      _fingers > 0 ? widget._descriptors[_fingers - 1].name : '';
+      _display ? widget._descriptors[_fingers - 1].name ?? '' : '';
 
-  String get _valueDisplay => _fingers > 0
+  String get _valueDisplay => _display
       ? (widget._values[_fingers - 1] + _valueChange).round().toString()
       : '';
 
@@ -123,8 +131,5 @@ class _BigSliderState extends State<BigSlider> {
   void _commitValue() {
     widget._incrementValue(_fingers, _valueChange);
     _valueChange = 0;
-    setState(() {
-      _fingers = 0;
-    });
   }
 }

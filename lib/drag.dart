@@ -21,12 +21,12 @@ class DragState {
     if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
       _drags.clear();
     }
-    var dragState = _Drag(_updateDrag);
+    var dragState = _Drag(_onDrag);
     _drags.add(dragState);
     return dragState;
   }
 
-  void _updateDrag() {
+  void _onDrag() {
     if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
       _onCommitDrag();
       _drags.clear();
