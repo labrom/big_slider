@@ -119,6 +119,15 @@ class _BigSliderState extends State<BigSlider> {
   void _updateValue(double distance) {
     setState(() {
       _valueChange = distance;
+      var newValue = widget._values[_fingers - 1] + _valueChange;
+      var max = widget._descriptors[_fingers - 1].maxValue;
+      var min = widget._descriptors[_fingers - 1].minValue;
+      if (max != null && newValue > max) {
+        _valueChange -= newValue - max;
+      }
+      if (min != null && newValue < min) {
+        _valueChange += min - newValue;
+      }
     });
     widget._listener(TouchType.values[_fingers - 1],
         widget._values[_fingers - 1] + _valueChange);
