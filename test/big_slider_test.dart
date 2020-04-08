@@ -123,4 +123,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('5'), findsOneWidget);
   });
+
+  testWidgets('A value changes in increments.', (tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: BigSlider(<TouchType, ValueDescriptor>{
+        TouchType.oneFinger: ValueDescriptor(initialValue: 0, increment: 10),
+      }, valuePrinter),
+    ));
+    await tester.drag(find.byType(BigSlider), Offset(0, -10));
+    await tester.pumpAndSettle();
+    expect(find.text('10'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, -4));
+    await tester.pumpAndSettle();
+    expect(find.text('10'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, -6));
+    await tester.pumpAndSettle();
+    expect(find.text('20'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, -16));
+    await tester.pumpAndSettle();
+    expect(find.text('40'), findsOneWidget);
+  });
 }

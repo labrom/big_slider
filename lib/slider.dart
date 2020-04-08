@@ -47,15 +47,26 @@ class ValueDescriptor {
   final double maxValue;
   final double minValue;
   final double increment;
+  final double scale;
   final String name;
 
   ValueDescriptor({
-    this.initialValue,
+    this.initialValue = 0,
     this.maxValue,
     this.minValue,
-    this.increment,
+    this.increment = 1,
+    this.scale = 1,
     this.name,
   });
+
+  double snapValue(double value) {
+    if (increment != null) {
+      return ((value / increment).floor() +
+              ((value % increment) / increment).round()) *
+          increment;
+    }
+    return value;
+  }
 }
 
 class _BigSliderState extends State<BigSlider> {
@@ -112,25 +123,36 @@ class _BigSliderState extends State<BigSlider> {
       _display ? widget._descriptors[_fingers - 1].name ?? '' : '';
 
   String get _valueDisplay => _display
-      ? (widget._values[_fingers - 1] + _valueChange).round().toString()
+      ? _pack(widget._descriptors[_fingers - 1]
+              .snapValue(widget._values[_fingers - 1] + _valueChange))
+          .toString()
       : '';
+
+  num _pack(double value) => value == value.floor() ? value.floor() : value;
 
   /// Updates the value as it's being changed using the corresponding drag gesture.
   void _updateValue(double distance) {
-    setState(() {
-      _valueChange = distance;
-      var newValue = widget._values[_fingers - 1] + _valueChange;
-      var max = widget._descriptors[_fingers - 1].maxValue;
-      var min = widget._descriptors[_fingers - 1].minValue;
-      if (max != null && newValue > max) {
-        _valueChange -= newValue - max;
-      }
-      if (min != null && newValue < min) {
-        _valueChange += min - newValue;
-      }
-    });
-    widget._listener(TouchType.values[_fingers - 1],
-        widget._values[_fingers - 1] + _valueChange);
+    var previousValueChange = _valueChange;
+    _valueChange = distance;
+    var max = widget._descriptors[_fingers - 1].maxValue;
+    var min = widget._descriptors[_fingers - 1].minValue;
+    var newValue = widget._values[_fingers - 1] + _valueChange;
+    if (max != null && newValue > max) {
+      _valueChange -= newValue - max;
+    }
+    if (min != null && newValue < min) {
+      _valueChange += min - newValue;
+    }
+
+    var snappedDistance =
+        widget._descriptors[_fingers - 1].snapValue(_valueChange);
+    var previousSnappedDistance =
+        widget._descriptors[_fingers - 1].snapValue(previousValueChange);
+    if (snappedDistance != previousSnappedDistance) {
+      setState(() {});
+      widget._listener(TouchType.values[_fingers - 1],
+          widget._values[_fingers - 1] + snappedDistance);
+    }
   }
 
   /// Updates the widget's value at the end of a given drag gesture.
@@ -138,7 +160,8 @@ class _BigSliderState extends State<BigSlider> {
   /// The system is also reset so that another (or the same) value can be adjusted
   /// using another drag gesture.
   void _commitValue() {
-    widget._incrementValue(_fingers, _valueChange);
+    widget._incrementValue(
+        _fingers, widget._descriptors[_fingers - 1].snapValue(_valueChange));
     _valueChange = 0;
   }
 }
