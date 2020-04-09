@@ -5,24 +5,29 @@ import 'dart:math';
 
 /// State manager that holds all the individual drags.
 class DragState {
-  List<_Drag> _drags = [];
+  List<_Drag> _drags;
   void Function(double distance) _onUpdateDrag;
   void Function() _onCommitDrag;
-  bool _increase = true;
+  bool _increase;
 
-  DragState(this._onUpdateDrag, this._onCommitDrag);
+  DragState(this._onUpdateDrag, this._onCommitDrag)
+      : _drags = [],
+        _increase = true;
 
   int get dragCount => _drags.length;
 
   /// Creates and keeps track of an additional drag.
   ///
   /// Returns the newly created drag.
-  Drag addDrag() {
+  Drag addDrag(double scale) {
     if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
       _drags.clear();
     }
     var dragState = _Drag(_onDrag);
     _drags.add(dragState);
+    for (var drag in _drags) {
+      drag.scale = scale;
+    }
     return dragState;
   }
 
@@ -43,11 +48,18 @@ class DragState {
 
 /// Drag event receiver for a single drag.
 class _Drag implements Drag {
-  double _distance = 0;
-  bool active = true;
+  double _distance;
+  double _scale;
+  bool _active;
   void Function() _updateDragState;
 
-  _Drag(this._updateDragState);
+  _Drag(this._updateDragState)
+      : _distance = 0,
+        _active = true;
+
+  bool get active => _active;
+
+  set scale(double scale) => _scale = scale;
 
   @override
   void cancel() => _completeDrag();
@@ -57,13 +69,13 @@ class _Drag implements Drag {
 
   @override
   void update(DragUpdateDetails details) {
-    active = true;
-    _distance -= details.delta.dy;
+    _active = true;
+    _distance -= details.delta.dy * _scale;
     _updateDragState();
   }
 
   void _completeDrag() {
-    active = false;
+    _active = false;
     _updateDragState();
     _distance = 0;
   }

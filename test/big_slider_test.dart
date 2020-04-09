@@ -21,7 +21,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0),
+        TouchType.oneFinger: ValueDescriptor(),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0, name: "throttle"),
+        TouchType.oneFinger: ValueDescriptor(name: "throttle"),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
@@ -51,7 +51,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0, name: "throttle"),
+        TouchType.oneFinger: ValueDescriptor(name: "throttle"),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(1, 0));
@@ -66,7 +66,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0),
+        TouchType.oneFinger: ValueDescriptor(),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
@@ -80,7 +80,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0),
+        TouchType.oneFinger: ValueDescriptor(),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 1));
@@ -93,7 +93,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0),
+        TouchType.oneFinger: ValueDescriptor(),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
@@ -112,8 +112,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger:
-            ValueDescriptor(initialValue: 0, minValue: -3, maxValue: 5),
+        TouchType.oneFinger: ValueDescriptor(minValue: -3, maxValue: 5),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 10));
@@ -128,7 +127,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: BigSlider(<TouchType, ValueDescriptor>{
-        TouchType.oneFinger: ValueDescriptor(initialValue: 0, increment: 10),
+        TouchType.oneFinger: ValueDescriptor(increment: 10),
       }, valuePrinter),
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -10));
@@ -143,5 +142,21 @@ void main() {
     await tester.drag(find.byType(BigSlider), Offset(0, -16));
     await tester.pumpAndSettle();
     expect(find.text('40'), findsOneWidget);
+  });
+
+  testWidgets('A value changes with a scale.', (tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: BigSlider(<TouchType, ValueDescriptor>{
+        TouchType.oneFinger:
+            ValueDescriptor(scale: 0.1, maxValue: 3, initialValue: 1),
+      }, valuePrinter),
+    ));
+    await tester.drag(find.byType(BigSlider), Offset(0, -10));
+    await tester.pumpAndSettle();
+    expect(find.text('2'), findsOneWidget);
+    await tester.drag(find.byType(BigSlider), Offset(0, -15));
+    await tester.pumpAndSettle();
+    expect(find.text('3'), findsOneWidget);
   });
 }

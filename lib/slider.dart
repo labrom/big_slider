@@ -68,11 +68,13 @@ class ValueDescriptor {
     if (maxValue != null && maxValue < initialValue)
       throw Exception('maxValue must be greater than or equal to initialValue');
     if (increment != null) {
-      if (initialValue % increment != 0)
+      if ((initialValue / increment).floor() != initialValue / increment)
         throw Exception('initialValue must be a multiple of increment');
-      if (minValue != null && minValue % increment != 0)
+      if (minValue != null &&
+          (minValue / increment).floor() != minValue / increment)
         throw Exception('minValue must be a multiple of increment');
-      if (maxValue != null && maxValue % increment != 0)
+      if (maxValue != null &&
+          (maxValue / increment).floor() != maxValue / increment)
         throw Exception('maxValue must be a multiple of increment');
       if (scale != null && (increment / scale).floor() != increment / scale)
         throw Exception('increment must be a multiple of scale');
@@ -119,7 +121,9 @@ class _BigSliderState extends State<BigSlider> {
       );
 
   Drag _onDragStart(Offset offset) {
-    var newDrag = _state.addDrag();
+    // Getting the scale from the descriptor of current drag count + 1
+    var scale = widget._descriptors[_state.dragCount].scale;
+    var newDrag = _state.addDrag(scale);
     setState(() {
       _display = true;
       _fingers = _state.dragCount;
