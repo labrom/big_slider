@@ -57,7 +57,27 @@ class ValueDescriptor {
     this.increment = 1,
     this.scale = 1,
     this.name,
-  });
+  }) {
+    _validate();
+  }
+
+  void _validate() {
+    if (minValue != null && minValue > initialValue)
+      throw FormatException(
+          'minValue must be smaller than or equal to initialValue');
+    if (maxValue != null && maxValue < initialValue)
+      throw Exception('maxValue must be greater than or equal to initialValue');
+    if (increment != null) {
+      if (initialValue % increment != 0)
+        throw Exception('initialValue must be a multiple of increment');
+      if (minValue != null && minValue % increment != 0)
+        throw Exception('minValue must be a multiple of increment');
+      if (maxValue != null && maxValue % increment != 0)
+        throw Exception('maxValue must be a multiple of increment');
+      if (scale != null && (increment / scale).floor() != increment / scale)
+        throw Exception('increment must be a multiple of scale');
+    }
+  }
 
   double snapValue(double value) {
     if (increment != null) {
