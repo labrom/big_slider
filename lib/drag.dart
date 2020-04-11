@@ -18,6 +18,9 @@ class DragState {
 
   /// Creates and keeps track of an additional drag.
   ///
+  /// 'scale' should be null in case this specific drag doesn't correspond
+  /// to an actual touch gesture, i.e. we expect another drag to be added after
+  /// this one.
   /// Returns the newly created drag.
   Drag addDrag(double scale) {
     if (_drags.firstWhere((drag) => !drag.active, orElse: () => null) != null) {
@@ -25,8 +28,10 @@ class DragState {
     }
     var dragState = _Drag(_onDrag);
     _drags.add(dragState);
-    for (var drag in _drags) {
-      drag.scale = scale;
+    if (scale != null) {
+      for (var drag in _drags) {
+        drag.scale = scale;
+      }
     }
     return dragState;
   }
@@ -59,6 +64,9 @@ class _Drag implements Drag {
 
   bool get active => _active;
 
+  /// Sets the scale for this drag.
+  ///
+  /// If 'scale' is null, drag updates are ignored.
   set scale(double scale) => _scale = scale;
 
   @override
@@ -70,13 +78,17 @@ class _Drag implements Drag {
   @override
   void update(DragUpdateDetails details) {
     _active = true;
-    _distance -= details.delta.dy * _scale;
-    _updateDragState();
+    if (_scale != null) {
+      _distance -= details.delta.dy * _scale;
+      _updateDragState();
+    }
   }
 
   void _completeDrag() {
     _active = false;
-    _updateDragState();
+    if (_scale != null) {
+      _updateDragState();
+    }
     _distance = 0;
   }
 }
