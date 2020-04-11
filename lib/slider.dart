@@ -16,8 +16,8 @@ class BigSlider extends StatefulWidget {
   final ValueListener _listener;
 
   BigSlider(Map<TouchType, ValueDescriptor> descriptors, this._listener)
-      : _values = List(descriptors.length),
-        _descriptors = List(descriptors.length) {
+      : _values = List(TouchType.values.length),
+        _descriptors = List(TouchType.values.length) {
     for (var entry in descriptors.entries) {
       _values[entry.key.index] = entry.value.initialValue;
       _descriptors[entry.key.index] = entry.value;
@@ -121,11 +121,12 @@ class _BigSliderState extends State<BigSlider> {
       );
 
   Drag _onDragStart(Offset offset) {
-    // Getting the scale from the descriptor of current drag count + 1
-    var scale = widget._descriptors[_state.dragCount].scale;
+    // Getting the scale from the descriptor of current drag count + 1.
+    // It might not be an actual touch gesture, in which case the scale is null.
+    var scale = widget._descriptors[_state.dragCount]?.scale;
     var newDrag = _state.addDrag(scale);
     setState(() {
-      _display = true;
+      _display = scale != null;
       _fingers = _state.dragCount;
     });
     return newDrag;
@@ -144,18 +145,25 @@ class _BigSliderState extends State<BigSlider> {
       );
 
   String get _nameDisplay =>
-      _display ? widget._descriptors[_fingers - 1].name ?? '' : '';
+      _display && widget._descriptors[_fingers - 1] != null
+          ? widget._descriptors[_fingers - 1].name ?? ''
+          : '';
 
-  String get _valueDisplay => _display
-      ? _pack(widget._descriptors[_fingers - 1]
-              .snapValue(widget._values[_fingers - 1] + _valueChange))
-          .toString()
-      : '';
+  String get _valueDisplay =>
+      _display && widget._descriptors[_fingers - 1] != null
+          ? _pack(widget._descriptors[_fingers - 1]
+                  .snapValue(widget._values[_fingers - 1] + _valueChange))
+              .toString()
+          : '';
 
   num _pack(double value) => value == value.floor() ? value.floor() : value;
 
   /// Updates the value as it's being changed using the corresponding drag gesture.
   void _updateValue(double distance) {
+    if (widget._descriptors[_fingers - 1] == null) {
+      print('Invalid touch gesture: ${TouchType.values[_fingers - 1]}');
+      return;
+    }
     var previousValueChange = _valueChange;
     _valueChange = distance;
     var max = widget._descriptors[_fingers - 1].maxValue;
