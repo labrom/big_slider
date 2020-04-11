@@ -50,6 +50,15 @@ void main() {
       }
     });
 
+    test('scale 0', () {
+      try {
+        ValueDescriptor(scale: 0);
+        fail(failMessage);
+      } catch (e) {
+        expect(e.message, isNotEmpty);
+      }
+    });
+
     test('increment not a multiple of scale', () {
       try {
         ValueDescriptor(increment: 2, scale: 0.6);
