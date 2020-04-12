@@ -1,5 +1,7 @@
 library big_slider;
 
+import 'package:big_slider/default_skin.dart';
+
 import 'drag.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +16,13 @@ class BigSlider extends StatefulWidget {
   final List<double> _values;
   final List<ValueDescriptor> _descriptors;
   final ValueListener _listener;
+  final SkinBuilder _builder;
 
-  BigSlider(Map<TouchType, ValueDescriptor> descriptors, this._listener)
+  BigSlider(Map<TouchType, ValueDescriptor> descriptors, this._listener,
+      {SkinBuilder builder})
       : _values = List(TouchType.values.length),
-        _descriptors = List(TouchType.values.length) {
+        _descriptors = List(TouchType.values.length),
+        _builder = builder ?? defaultSkinBuilder(descriptors) {
     for (var entry in descriptors.entries) {
       _values[entry.key.index] = entry.value.initialValue;
       _descriptors[entry.key.index] = entry.value;
@@ -30,6 +35,13 @@ class BigSlider extends StatefulWidget {
   void _incrementValue(int fingers, double increment) =>
       _values[fingers - 1] += increment;
 }
+
+/// A builder function for displaying the widget with its values.
+///
+/// The 'TouchType' is the current value, it is null if no
+/// value is currently being adjusted.
+/// The map contains the current values for all the supported touch gestures.
+typedef SkinBuilder = Widget Function(TouchType, Map<TouchType, double>);
 
 /// A value listener function that receives updates for different values.
 ///
@@ -76,7 +88,6 @@ class ValueDescriptor {
       if (maxValue != null &&
           (maxValue / increment).floor() != maxValue / increment)
         throw Exception('maxValue must be a multiple of increment');
-      if (scale == 0) throw Exception('scale must be different from 0');
       if (scale != null && (increment / scale).floor() != increment / scale)
         throw Exception('increment must be a multiple of scale');
     }
@@ -112,7 +123,7 @@ class _BigSliderState extends State<BigSlider> {
         gestures: <Type, GestureRecognizerFactory>{
           VerticalMultiDragGestureRecognizer: _verticalMultiDragGestureFactory,
         },
-        child: _body,
+        child: widget._builder(_touchType, _valuesByType),
       );
 
   GestureRecognizerFactory get _verticalMultiDragGestureFactory =>
@@ -133,38 +144,30 @@ class _BigSliderState extends State<BigSlider> {
     return newDrag;
   }
 
-  Widget get _body => Container(
-        color: Colors.amber,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_valueDisplay),
-            Text(_nameDisplay),
-          ],
-        ),
-      );
-
-  String get _nameDisplay =>
+  TouchType get _touchType =>
       _display && widget._descriptors[_fingers - 1] != null
-          ? widget._descriptors[_fingers - 1].name ?? ''
-          : '';
+          ? TouchType.values[_fingers - 1]
+          : null;
 
-  String get _valueDisplay =>
-      _display && widget._descriptors[_fingers - 1] != null
-          ? _pack(widget._descriptors[_fingers - 1]
-                  .snapValue(widget._values[_fingers - 1] + _valueChange))
-              .toString()
-          : '';
-
-  num _pack(double value) => value == value.floor() ? value.floor() : value;
+  Map<TouchType, double> get _valuesByType {
+    var valuesByType = <TouchType, double>{};
+    for (var i = 0; i < widget._values.length; i++) {
+      var value = widget._values[i];
+      if (value != null) {
+        // If this value is the one being adjusted, add up the value change.
+        if (i == _fingers - 1) {
+          value += _valueChange;
+        }
+        valuesByType[TouchType.values[i]] = value;
+      }
+    }
+    return valuesByType;
+  }
 
   /// Updates the value as it's being changed using the corresponding drag gesture.
   void _updateValue(double distance) {
-    if (widget._descriptors[_fingers - 1] == null) {
-      print('Invalid touch gesture: ${TouchType.values[_fingers - 1]}');
-      return;
-    }
+    if (!_validateTouch()) return;
+
     var previousValueChange = _valueChange;
     _valueChange = distance;
     var max = widget._descriptors[_fingers - 1].maxValue;
@@ -193,8 +196,18 @@ class _BigSliderState extends State<BigSlider> {
   /// The system is also reset so that another (or the same) value can be adjusted
   /// using another drag gesture.
   void _commitValue() {
+    if (!_validateTouch()) return;
+
     widget._incrementValue(
         _fingers, widget._descriptors[_fingers - 1].snapValue(_valueChange));
     _valueChange = 0;
+  }
+
+  bool _validateTouch() {
+    if (widget._descriptors[_fingers - 1] == null) {
+      print('Invalid touch gesture: ${TouchType.values[_fingers - 1]}');
+      return false;
+    }
+    return true;
   }
 }
