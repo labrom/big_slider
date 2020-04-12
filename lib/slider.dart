@@ -88,6 +88,7 @@ class ValueDescriptor {
       if (maxValue != null &&
           (maxValue / increment).floor() != maxValue / increment)
         throw Exception('maxValue must be a multiple of increment');
+      if (scale == 0) throw Exception('scale must be different from 0');
       if (scale != null && (increment / scale).floor() != increment / scale)
         throw Exception('increment must be a multiple of scale');
     }
