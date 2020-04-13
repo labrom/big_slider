@@ -120,4 +120,20 @@ void main() {
     expect(descriptor.snapValue(-0.5), -0.5);
     expect(descriptor.snapValue(-0.7), -0.5);
   });
+
+  test('Value ratio.', () {
+    var descriptor = ValueDescriptor(minValue: -5, maxValue: 5);
+    expect(descriptor.valueRatio(null), 0);
+    expect(descriptor.valueRatio(0), 0.5);
+    expect(descriptor.valueRatio(-5), 0);
+    expect(descriptor.valueRatio(5), 1);
+    expect(descriptor.valueRatio(-5.5), 0);
+    expect(descriptor.valueRatio(5.5), 1);
+  });
+
+  test('Value ratio without min or max.', () {
+    var descriptor = ValueDescriptor();
+    expect(descriptor.valueRatio(null), 0);
+    expect(descriptor.valueRatio(1), 0);
+  });
 }

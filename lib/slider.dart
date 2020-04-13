@@ -1,5 +1,7 @@
 library big_slider;
 
+import 'dart:math';
+
 import 'package:big_slider/default_skin.dart';
 
 import 'drag.dart';
@@ -94,6 +96,9 @@ class ValueDescriptor {
     }
   }
 
+  /// Snaps 'value' to the closest increment of this descriptor.
+  ///
+  /// If this descriptor doesn't have increments, this function returns 'value' unchanged.
   double snapValue(double value) {
     if (increment != null) {
       return ((value / increment).floor() +
@@ -101,6 +106,20 @@ class ValueDescriptor {
           increment;
     }
     return value;
+  }
+
+  /// Indicates what proportion (from 0 to 1) of this descriptor's range 'value' is.
+  ///
+  /// For example, if this descriptor's minimum value is 0 and its maximum value is 10,
+  /// this function will return 0.8 for 'value' = 8.
+  /// This is useful for drawing a range indicator in the widget.
+  /// If this descriptor doesn't have a minimum value and a maximum value,
+  /// this function always returns 0. It also returns 0 if 'value' is null.
+  double valueRatio(double value) {
+    if (value != null && maxValue != null && minValue != null) {
+      return max(0, min(1, (value - minValue) / (maxValue - minValue)));
+    }
+    return 0;
   }
 }
 
