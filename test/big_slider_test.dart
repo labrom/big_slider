@@ -12,7 +12,7 @@ void main() {
       child: BigSlider(<TouchType, ValueDescriptor>{}, null),
     ));
     expect(find.byType(BigSlider), findsOneWidget);
-    expect(find.text(''), findsNWidgets(2));
+    expect(find.text(''), findsOneWidget);
   });
 
   testWidgets(
@@ -26,7 +26,7 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('1'), findsNWidgets(2));
     expect(find.text(''), findsOneWidget);
   });
 
@@ -41,7 +41,7 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('1'), findsNWidgets(2));
     expect(find.text('throttle'), findsOneWidget);
   });
 
@@ -56,7 +56,7 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(1, 0));
     await tester.pumpAndSettle();
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('0'), findsNWidgets(2));
     expect(find.text('throttle'), findsOneWidget);
   });
 
@@ -71,7 +71,7 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('1'), findsNWidgets(2));
   });
 
   testWidgets(
@@ -85,7 +85,7 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 1));
     await tester.pumpAndSettle();
-    expect(find.text('-1'), findsOneWidget);
+    expect(find.text('-1'), findsNWidgets(2));
   });
 
   testWidgets('A value is not reset between two drag gestures.',
@@ -98,13 +98,13 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('1'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -1));
     await tester.pumpAndSettle();
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('2'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, 3));
     await tester.pumpAndSettle();
-    expect(find.text('-1'), findsOneWidget);
+    expect(find.text('-1'), findsNWidgets(2));
   });
 
   testWidgets('A value never goes beyond the maximum or minimum.',
@@ -117,10 +117,10 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, 10));
     await tester.pumpAndSettle();
-    expect(find.text('-3'), findsOneWidget);
+    expect(find.text('-3'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -10));
     await tester.pumpAndSettle();
-    expect(find.text('5'), findsOneWidget);
+    expect(find.text('5'), findsNWidgets(2));
   });
 
   testWidgets('A value changes in increments.', (tester) async {
@@ -132,16 +132,16 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -10));
     await tester.pumpAndSettle();
-    expect(find.text('10'), findsOneWidget);
+    expect(find.text('10'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -4));
     await tester.pumpAndSettle();
-    expect(find.text('10'), findsOneWidget);
+    expect(find.text('10'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -6));
     await tester.pumpAndSettle();
-    expect(find.text('20'), findsOneWidget);
+    expect(find.text('20'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -16));
     await tester.pumpAndSettle();
-    expect(find.text('40'), findsOneWidget);
+    expect(find.text('40'), findsNWidgets(2));
   });
 
   testWidgets('A value changes with a scale.', (tester) async {
@@ -154,9 +154,9 @@ void main() {
     ));
     await tester.drag(find.byType(BigSlider), Offset(0, -10));
     await tester.pumpAndSettle();
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('2'), findsNWidgets(2));
     await tester.drag(find.byType(BigSlider), Offset(0, -15));
     await tester.pumpAndSettle();
-    expect(find.text('3'), findsOneWidget);
+    expect(find.text('3'), findsNWidgets(2));
   });
 }
