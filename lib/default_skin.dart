@@ -1,15 +1,15 @@
-import 'dart:math';
-
 import 'package:big_slider/slider.dart';
 import 'package:flutter/widgets.dart';
+
+import 'gauge.dart';
 
 SkinBuilder defaultSkinBuilder(Map<TouchType, ValueDescriptor> descriptors) =>
     (TouchType activeTouch, Map<TouchType, double> values) {
       return _DefaultSkin(
         activeValueText:
             _valueDisplay(values[activeTouch], descriptors[activeTouch]),
-        activeValueLevel: _ValueLevel(
-            descriptors[activeTouch]?.valueRatio(values[activeTouch])),
+        activeValueLevel:
+            Gauge(descriptors[activeTouch]?.valueRatio(values[activeTouch])),
         medallions: List.from(descriptors.entries.map(
           (entry) => _Medallion(
             active: entry.key == activeTouch,
@@ -28,7 +28,7 @@ num _pack(double value) => value == value.floor() ? value.floor() : value;
 
 class _DefaultSkin extends StatelessWidget {
   final String activeValueText;
-  final _ValueLevel activeValueLevel;
+  final Widget activeValueLevel;
   final List<_Medallion> medallions;
 
   _DefaultSkin({
@@ -41,9 +41,9 @@ class _DefaultSkin extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         color: Color(0xFFFFFFFF),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Flexible(
+            Expanded(
               flex: 1,
               child: activeValueLevel,
             ),
@@ -110,24 +110,6 @@ class _Medallion extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      );
-}
-
-class _ValueLevel extends StatelessWidget {
-  /// Minimum height factor as it cannot be 0.
-  static const _minHeightFactor = 0.0001;
-
-  final double _ratio;
-
-  _ValueLevel(this._ratio);
-
-  @override
-  Widget build(BuildContext context) => FractionallySizedBox(
-        widthFactor: 1,
-        heightFactor: max(_ratio ?? _minHeightFactor, _minHeightFactor),
-        child: Container(
-          color: Color(0x99000000),
         ),
       );
 }
